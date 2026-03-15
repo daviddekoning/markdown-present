@@ -85,6 +85,14 @@ def test_serve_missing_file():
     
     res_file = client.get(f"/api/presentations/{pres_id}/files/missing.md")
     assert res_file.status_code == 404
+
+def test_serve_path_traversal():
+    content = create_test_zip_content()
+    res = client.post("/api/upload", files={"file": ("test.zip", content, "application/zip")})
+    pres_id = res.json()["presentation_id"]
+    
+    res_file = client.get(f"/api/presentations/{pres_id}/files/../../etc/passwd")
+    assert res_file.status_code == 403
     
 def test_websockets_and_end_presentation():
     content = create_test_zip_content()

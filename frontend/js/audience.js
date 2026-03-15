@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    Reveal.initialize({
+    await Reveal.initialize({
         controls: false,
         controlsTutorial: false,
         progress: false,
@@ -59,50 +59,58 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/view/${presentationId}`;
-    const ws = new WebSocket(wsUrl);
 
+    let ws = null;
     let lastSequence = -1;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+    let intentionallyClosed = false;
 
-    ws.onopen = () => {
-        console.log("WebSocket connected");
-        document.getElementById("status-text").innerHTML = "<span style='color: #22c55e;'>●</span> Live";
-    };
+    function connectWebSocket() {
+        ws = new WebSocket(wsUrl);
 
-    ws.onclose = () => {
-        console.log("WebSocket disconnected");
-        document.getElementById("status-text").innerHTML = "<span style='color: #ef4444;'>●</span> Disconnected";
-    };
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            reconnectAttempts = 0;
+            document.getElementById("status-text").innerHTML = "<span style='color: #22c55e;'>●</span> Live";
+        };
 
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.action === "ended") {
-            alert("Presentation ended by presenter.");
-            window.location.href = "/";
-        } else if (data.action === "slide_changed" && data.state) {
-            // Guard against out-of-order packets via sequence checking
-            if (data.sequence !== undefined) {
-                if (data.sequence <= lastSequence) {
-                    console.log("Ignoring stale packet", data.sequence, "<=", lastSequence);
-                    return; 
-                }
-                lastSequence = data.sequence;
+        ws.onclose = () => {
+            console.log("WebSocket disconnected");
+            document.getElementById("status-text").innerHTML = "<span style='color: #ef4444;'>●</span> Disconnected";
+            if (!intentionallyClosed && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                reconnectAttempts++;
+                console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+                document.getElementById("status-text").innerHTML = "<span style='color: #f59e0b;'>●</span> Reconnecting...";
+                setTimeout(connectWebSocket, delay);
             }
+        };
 
-            const state = data.state;
-            // Reveal.getIndices() returns {h: 0, v: 0, f: 0} or {indexh: 0, indexv: 0, indexf: 0}
-            const h = state.h !== undefined ? state.h : state.indexh;
-            const v = state.v !== undefined ? state.v : state.indexv;
-            const f = state.f !== undefined ? state.f : state.indexf;
-            Reveal.slide(h, v, f);
-            
-            // Handle overview mode sync if present
-            if (state.overview !== undefined) {
-                if (state.overview && !Reveal.isOverview()) {
-                    Reveal.toggleOverview();
-                } else if (!state.overview && Reveal.isOverview()) {
-                    Reveal.toggleOverview();
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.action === "ended") {
+                intentionallyClosed = true;
+                alert("Presentation ended by presenter.");
+                window.location.href = "/";
+            } else if (data.action === "slide_changed" && data.state) {
+                // Guard against out-of-order packets via sequence checking
+                if (data.sequence !== undefined) {
+                    if (data.sequence <= lastSequence) {
+                        console.log("Ignoring stale packet", data.sequence, "<=", lastSequence);
+                        return; 
+                    }
+                    lastSequence = data.sequence;
                 }
+
+                const state = data.state;
+                const h = state.h !== undefined ? state.h : state.indexh;
+                const v = state.v !== undefined ? state.v : state.indexv;
+                const f = state.f !== undefined ? state.f : state.indexf;
+                Reveal.slide(h, v, f);
             }
-        }
-    };
+        };
+    }
+
+    connectWebSocket();
 });

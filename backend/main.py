@@ -90,7 +90,7 @@ def serve_presentation_file(id: str, file_path: str):
     pres = presentations[id]
     full_path = os.path.normpath(os.path.join(pres.tmp_path, file_path))
     # Prevent path traversal
-    if not full_path.startswith(pres.tmp_path):
+    if not full_path.startswith(pres.tmp_path + os.sep):
         raise HTTPException(status_code=403, detail="Forbidden")
     
     if not os.path.exists(full_path):

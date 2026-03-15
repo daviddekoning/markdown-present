@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
     }
 
-    Reveal.initialize({
+    await Reveal.initialize({
         controls: true,
         progress: true,
         history: false,
@@ -67,31 +67,48 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/present/${presentationId}?token=${token}`;
-    const ws = new WebSocket(wsUrl);
 
+    let ws = null;
     let isConnected = false;
     let sequenceNumber = 0;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 10;
+    let intentionallyClosed = false;
 
-    ws.onopen = () => {
-        console.log("WebSocket connected");
-        isConnected = true;
-        setTimeout(() => syncState(), 500);
-    };
+    function connectWebSocket() {
+        ws = new WebSocket(wsUrl);
 
-    ws.onclose = () => {
-        console.log("WebSocket disconnected");
-        isConnected = false;
-    };
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+            isConnected = true;
+            reconnectAttempts = 0;
+            setTimeout(() => syncState(), 500);
+        };
 
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.action === "ended") {
-            window.location.href = "/";
-        }
-    };
+        ws.onclose = () => {
+            console.log("WebSocket disconnected");
+            isConnected = false;
+            if (!intentionallyClosed && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                reconnectAttempts++;
+                console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+                setTimeout(connectWebSocket, delay);
+            }
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.action === "ended") {
+                intentionallyClosed = true;
+                window.location.href = "/";
+            }
+        };
+    }
+
+    connectWebSocket();
 
     function syncState() {
-        if(isConnected && ws.readyState === WebSocket.OPEN) {
+        if(isConnected && ws && ws.readyState === WebSocket.OPEN) {
             sequenceNumber++;
             ws.send(JSON.stringify({
                 action: "change_slide",
@@ -110,6 +127,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.getElementById("end-btn").addEventListener("click", async () => {
         if(confirm("End presentation for everyone?")) {
+            intentionallyClosed = true;
             await fetch(`/api/end/${presentationId}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

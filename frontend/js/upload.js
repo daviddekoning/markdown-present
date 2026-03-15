@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         recentList.innerHTML += "<p style='color: var(--text-color); opacity: 0.6;'>No recent presentations.</p>";
     } else {
         // Reverse to show newest first
-        recent.reverse().forEach((item) => {
+        [...recent].reverse().forEach((item) => {
             const div = document.createElement("div");
             div.className = "recent-item";
             const dateStr = new Date(item.date).toLocaleDateString();
