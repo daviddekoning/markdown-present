@@ -44,10 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     Reveal.initialize({
         controls: false,
+        controlsTutorial: false,
         progress: false,
         history: false,
         keyboard: false,
         touch: false,
+        mouseWheel: false,
+        help: false,
+        overview: false,
         center: true,
         transition: 'slide',
         plugins: [ RevealMarkdown ]
