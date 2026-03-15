@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presenter | Markdown Present</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css" id="theme">
+  
+  <style>
+    body { overflow: hidden; } /* Reveal handles scroll */
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <strong>Presenter View</strong>
+      <button class="theme-toggle-btn" style="position: static;" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </div>
+    <div class="top-bar-right">
+      <span style="font-size: 0.9rem;">Share this URL with Audience:</span>
+      <div class="audience-url" id="share-url" title="Click to copy">Loading...</div>
+      <button class="danger" id="end-btn">End Presentation</button>
+    </div>
+  </div>
+
+  <div class="reveal-container reveal">
+    <div class="slides" id="slides-container">
+      <section data-markdown id="markdown-container" data-separator="^\r?\n---\r?\n$" data-separator-vertical="^\r?\n--\r?\n$" data-separator-notes="^Note:">
+        <script type="text/template" id="markdown-content">
+          Loading presentation...
+        </script>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/markdown/markdown.min.js"></script>
+  <script src="/js/presenter.js"></script>
+</body>
+</html>

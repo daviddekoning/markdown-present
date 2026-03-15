@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Present</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+</head>
+<body data-theme="dark">
+  <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+
+  <div class="upload-container">
+    <h1>Markdown Present</h1>
+    <p class="subtitle">Upload a zipped presentation to share it live.</p>
+
+    <div class="file-upload-wrapper">
+      <input type="file" id="file-input" class="file-upload-input" accept=".zip">
+      <div id="file-upload-text" class="file-upload-text">
+        Drag & Drop or Click to Upload (.zip)
+      </div>
+    </div>
+    
+    <button id="upload-btn" class="primary" style="display:none;">Start Presenting</button>
+    <p id="upload-status" style="margin-top: 1rem; color: var(--primary-color); display: none;">Uploading...</p>
+    <p id="upload-error" style="margin-top: 1rem; color: #ef4444; display: none;"></p>
+
+    <div class="recent-presentations" id="recent-list">
+      <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Recent Presentations</h3>
+      <!-- Populated via Javascript -->
+    </div>
+  </div>
+
+  <script src="/js/upload.js"></script>
+</body>
+</html>

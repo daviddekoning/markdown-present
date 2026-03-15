@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+wheels/
+*.egg-info
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Virtual environments
+.venv
+venv/
+ENV/
+
+# OS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# App specific 
+*.zip
+# Allow our sample zips though
+!samples/basic_pitch.zip
+!samples/with_images.zip

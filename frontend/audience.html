@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View | Markdown Present</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/black.min.css" id="theme">
+  
+  <style>
+    body { overflow: hidden; } /* Reveal handles scroll */
+    /* Remove controls for audience */
+    .reveal .controls, .reveal .progress { display: none !important; }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <strong>Audience View</strong>
+      <button class="theme-toggle-btn" style="position: static;" id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+    </div>
+    <div class="top-bar-right" id="status-text">
+       Connecting to Presenter...
+    </div>
+  </div>
+
+  <div class="reveal-container reveal" style="pointer-events: none;">
+    <!-- Pointer events none prevents audience from interacting with slides (clicking links maybe an exception, but avoiding navigation) -->
+    <div class="slides" id="slides-container">
+      <section data-markdown id="markdown-container" data-separator="^\r?\n---\r?\n$" data-separator-vertical="^\r?\n--\r?\n$" data-separator-notes="^Note:">
+        <script type="text/template" id="markdown-content">
+          Waiting for presentation...
+        </script>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/markdown/markdown.min.js"></script>
+  <script src="/js/audience.js"></script>
+</body>
+</html>
