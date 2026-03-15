@@ -155,14 +155,21 @@ async def ws_controller(websocket: WebSocket, id: str, token: str):
             data = await websocket.receive_text()
             msg = json.loads(data)
             if msg.get("action") == "change_slide":
-                # msg format: {"action": "change_slide", "state": {"indexh": 0, "indexv": 0, "indexf": 0}}
+                # msg format: {"action": "change_slide", "state": {"indexh": 0, "indexv": 0, "indexf": 0}, "sequence": 1}
                 state = msg.get("state", pres.state)
+                sequence = msg.get("sequence", pres.sequence)
                 pres.state = state
+                pres.sequence = sequence
+                
                 # broadcast to viewers
                 if id in viewers:
                     for ws in viewers[id]:
                         try:
-                            await ws.send_text(json.dumps({"action": "slide_changed", "state": state}))
+                            await ws.send_text(json.dumps({
+                                "action": "slide_changed", 
+                                "state": state,
+                                "sequence": sequence
+                            }))
                         except Exception:
                             pass
     except WebSocketDisconnect:
@@ -183,7 +190,11 @@ async def ws_viewer(websocket: WebSocket, id: str):
     
     # Send current state
     pres = presentations[id]
-    await websocket.send_text(json.dumps({"action": "slide_changed", "state": pres.state}))
+    await websocket.send_text(json.dumps({
+        "action": "slide_changed", 
+        "state": pres.state,
+        "sequence": pres.sequence
+    }))
 
     try:
         while True:

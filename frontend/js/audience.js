@@ -61,6 +61,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const wsUrl = `${protocol}//${window.location.host}/ws/view/${presentationId}`;
     const ws = new WebSocket(wsUrl);
 
+    let lastSequence = -1;
+
     ws.onopen = () => {
         console.log("WebSocket connected");
         document.getElementById("status-text").innerHTML = "<span style='color: #22c55e;'>●</span> Live";
@@ -77,6 +79,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             alert("Presentation ended by presenter.");
             window.location.href = "/";
         } else if (data.action === "slide_changed" && data.state) {
+            // Guard against out-of-order packets via sequence checking
+            if (data.sequence !== undefined) {
+                if (data.sequence <= lastSequence) {
+                    console.log("Ignoring stale packet", data.sequence, "<=", lastSequence);
+                    return; 
+                }
+                lastSequence = data.sequence;
+            }
+
             const state = data.state;
             // Reveal.getIndices() returns {h: 0, v: 0, f: 0} or {indexh: 0, indexv: 0, indexf: 0}
             const h = state.h !== undefined ? state.h : state.indexh;

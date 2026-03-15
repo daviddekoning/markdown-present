@@ -70,6 +70,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const ws = new WebSocket(wsUrl);
 
     let isConnected = false;
+    let sequenceNumber = 0;
 
     ws.onopen = () => {
         console.log("WebSocket connected");
@@ -91,9 +92,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function syncState() {
         if(isConnected && ws.readyState === WebSocket.OPEN) {
+            sequenceNumber++;
             ws.send(JSON.stringify({
                 action: "change_slide",
-                state: { ...Reveal.getIndices(), overview: Reveal.isOverview() }
+                state: { ...Reveal.getIndices(), overview: Reveal.isOverview() },
+                sequence: sequenceNumber,
+                timestamp: Date.now()
             }));
         }
     }

@@ -6,4 +6,5 @@ class Presentation(BaseModel):
     token: str
     tmp_path: str
     main_markdown_path: str
-    state: Dict[str, Any] = {"indexh": 0, "indexv": 0, "indexf": 0}
+    state: Dict[str, Any] = {"indexh": 0, "indexv": 0, "indexf": 0, "overview": False}
+    sequence: int = 0
